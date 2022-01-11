@@ -2,6 +2,7 @@
 // 这里先简单实现
 
 import { isOn } from "../shared";
+import { createRenderer } from "../runtime-core";
 
 function createElement(type) {
   console.log('CreateElement', type);

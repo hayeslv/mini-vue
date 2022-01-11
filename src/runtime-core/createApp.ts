@@ -11,5 +11,6 @@ export function createAppAPI(render) {
         render(vnode, rootContainer);
       }
     }
+    return app;
   }
 }
