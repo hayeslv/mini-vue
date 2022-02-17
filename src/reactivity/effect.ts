@@ -2,12 +2,12 @@ let activeEffect;
 
 class ReactiveEffect {
   private _fn: any;
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn;
   }
   run() {
     activeEffect = this; // 调用run的时候，表示是正在执行的状态。让activeEffect等于当前的effect
-    this._fn();
+    return this._fn();
   }
 }
 
@@ -35,13 +35,21 @@ export function trigger(target, key) {
   // 基于 target 和 key 来取出 dep 对象来，然后遍历执行之前所有收集到的 fn
   let depsMap = targetMap.get(target);
   let dep = depsMap.get(key);
-  for(const effect of dep) {
-    effect.run();
+  for (const effect of dep) {
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 }
 
-export function effect(fn) {
-  const _effect = new ReactiveEffect(fn);
+export function effect(fn, options: any = {}) {
+  const _effect = new ReactiveEffect(fn, options.scheduler);
 
   _effect.run(); // effect的回调函数是需要立即执行的
+
+  const runner = _effect.run.bind(_effect);
+
+  return runner;
 }
