@@ -4,7 +4,8 @@ class ReactiveEffect {
     this._fn = fn;
   }
   run() {
-    activeEffect = this; // 调用 run 的时候表示当前 effect 是正在执行的状态，把它赋值给 activeEffect
+    // 调用 run 的时候表示当前 effect 是正在执行的状态，把它赋值给 activeEffect
+    activeEffect = this;
     this._fn();
   }
 }
@@ -13,6 +14,9 @@ const targetMap = new Map();
 let activeEffect;
 
 export function track(target, key) {
+  // 依赖不能重复，我们选择 Set 这个数据结构
+  // target -> key -> dep
+
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
@@ -25,10 +29,14 @@ export function track(target, key) {
     depsMap.set(key, dep);
   }
 
+  // effect收集依赖的过程是在run方法执行中
+  // 所以是先执行run方法，这里可以保证 activeEffect 已经有值了
   dep.add(activeEffect);
 }
 
 export function trigger(target, key) {
+  // 基于target和key取出dep，执行effect的run方法（用户传入的fn）
+
   const depsMap = targetMap.get(target);
   const dep = depsMap.get(key);
 
@@ -38,7 +46,9 @@ export function trigger(target, key) {
 }
 
 export function effect(fn) {
+  // 封装，用类进行表示
   const _effect = new ReactiveEffect(fn);
 
+  // 当调用effect的时候，直接执行内部的fn（封装在run方法中）
   _effect.run();
 }
