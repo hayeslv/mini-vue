@@ -16,17 +16,19 @@ describe("effect", () => {
     user.age++;
     expect(nextAge).toBe(12);
   });
+
   it("should return runner when call effect", () => {
     let foo = 10;
     const runner = effect(() => {
       foo++;
-      return "foo";
+      return "fooo";
     });
     expect(foo).toBe(11);
     const r = runner();
     expect(foo).toBe(12);
-    expect(r).toBe("foo");
+    expect(r).toBe("fooo");
   });
+
   it("scheduler", () => {
     let dummy;
     let run: any;
@@ -45,10 +47,10 @@ describe("effect", () => {
     obj.foo++;
     expect(scheduler).toHaveBeenCalledTimes(1);
     expect(dummy).toBe(1);
-
-    runner();
+    run();
     expect(dummy).toBe(2);
   });
+
   it("stop", () => {
     let dummy;
     const obj = reactive({ prop: 1 });
@@ -58,22 +60,30 @@ describe("effect", () => {
     obj.prop = 2;
     expect(dummy).toBe(2);
     stop(runner);
+    // stop的边缘 case
     obj.prop = 3;
-    expect(dummy).toBe(2);
+    // obj.prop++;
+    // expect(dummy).toBe(2);
 
     runner();
     expect(dummy).toBe(3);
   });
+
   it("onStop", () => {
-    const obj = reactive({ foo: 1 });
+    const obj = reactive({
+      foo: 1,
+    });
     const onStop = jest.fn();
     let dummy;
     const runner = effect(
       () => {
         dummy = obj.foo;
       },
-      { onStop }
+      {
+        onStop,
+      }
     );
+
     stop(runner);
     expect(onStop).toHaveBeenCalledTimes(1);
   });
