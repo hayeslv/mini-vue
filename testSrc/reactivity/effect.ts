@@ -1,8 +1,9 @@
-import { extend } from "../shared/index";
+import { extend } from "../share";
+
 class ReactiveEffect {
   private _fn: any;
-  deps = [];
-  active: boolean = true;
+  deps: any = [];
+  active = true;
   onStop?: () => void;
   constructor(fn, public scheduler?) {
     this._fn = fn;
@@ -28,7 +29,7 @@ function clearupEffect(effect) {
   });
 }
 
-let targetMap = new Map();
+const targetMap = new Map();
 let activeEffect;
 
 export function track(target, key) {
@@ -41,7 +42,7 @@ export function track(target, key) {
   let dep = depsMap.get(key);
   if (!dep) {
     dep = new Set();
-    depsMap.set(key, dep);  1
+    depsMap.set(key, dep);
   }
 
   if (!activeEffect) return;
@@ -63,15 +64,18 @@ export function trigger(target, key) {
 }
 
 export function stop(runner) {
-  runner._effect.stop();
+  runner.effect.stop();
 }
 
 export function effect(fn, options: any = {}) {
   const _effect = new ReactiveEffect(fn, options.scheduler);
+
   extend(_effect, options);
+
   _effect.run();
 
   const runner: any = _effect.run.bind(_effect);
-  runner._effect = _effect;
+  runner.effect = _effect;
+
   return runner;
 }

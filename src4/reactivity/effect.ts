@@ -1,7 +1,7 @@
 import { extend } from "../shared";
 
 let activeEffect;
-let shouldTrack;
+let shouldTrack; // 控制是否应该收集依赖
 class ReactiveEffect {
   private _fn: any;
   deps = [];
@@ -20,7 +20,7 @@ class ReactiveEffect {
     shouldTrack = true;
     activeEffect = this;
     const result = this._fn();
-    shouldTrack = false;
+    shouldTrack = false; // 执行完成 fn 后，关掉 shouldTrack。因为它是一个全局变量
     return result;
   }
   stop() {
@@ -46,7 +46,7 @@ const targetMap = new Map();
 export function track(target, key) {
   // if (!activeEffect) return;
   // if (!shouldTrack) return;
-  if (!isTracking()) return;
+  if (!isTracking()) return; // 如果不需要 track 的话，后面的收集依赖也就不需要了。
 
   let depsMap = targetMap.get(target);
   if (!depsMap) {
@@ -67,6 +67,7 @@ export function track(target, key) {
 }
 
 function isTracking() {
+  // shouldTrack 为 true，并且 activeEffect 有值，说明应该是一个正在收集的状态
   return shouldTrack && activeEffect !== undefined;
 }
 

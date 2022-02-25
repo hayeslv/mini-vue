@@ -60,7 +60,7 @@ describe("effect", () => {
     obj.prop = 2;
     expect(dummy).toBe(2);
     stop(runner);
-    // stop的边缘 case
+    //! stop的边缘 case
     // obj.prop = 3;
     obj.prop++; // 触发get的时候会去重新收集依赖
     expect(dummy).toBe(2);

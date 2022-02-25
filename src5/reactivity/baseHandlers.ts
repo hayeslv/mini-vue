@@ -1,3 +1,4 @@
+import { extend } from "./../../testSrc/share/index";
 import { isObject } from "../shared";
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readonly } from "./reactive";
@@ -5,8 +6,9 @@ import { reactive, ReactiveFlags, readonly } from "./reactive";
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);
+const shallowReadonlyGet = createGetter(true, true);
 
-function createGetter(isReadonly = false) {
+function createGetter(isReadonly = false, shallow = false) {
   return function get(target, key) {
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly;
@@ -16,7 +18,12 @@ function createGetter(isReadonly = false) {
 
     const res = Reflect.get(target, key);
 
-    // 看看 res 是不是一个 object
+    // !如果是 shallow 类型的话，下面的嵌套就不要再执行了
+    if (shallow) {
+      return res;
+    }
+
+    // 处理嵌套逻辑：看看 res 是不是一个 object
     if (isObject(res)) {
       return isReadonly ? readonly(res) : reactive(res);
     }
@@ -48,3 +55,8 @@ export const readonlyHanders = {
     return true;
   },
 };
+
+// set和readonlyHanders的set是一样的，所以这里直接使用 extend 扩展
+export const shallowReadonlyHanders = extend({}, readonlyHanders, {
+  get: shallowReadonlyGet,
+});
