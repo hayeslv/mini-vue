@@ -1,7 +1,7 @@
 import { effect, stop } from "../effect";
 import { reactive } from "../reactive";
 
-describe("effect", () => {
+describe.skip("effect", () => {
   it("happy path", () => {
     const user = reactive({
       age: 10,

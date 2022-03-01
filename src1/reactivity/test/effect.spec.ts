@@ -1,7 +1,7 @@
 import { effect } from "../effect";
 import { reactive } from "../reactive";
 
-describe("effect", () => {
+describe.skip("effect", () => {
   // 核心代码逻辑
   it("happy path", () => {
     const user = reactive({

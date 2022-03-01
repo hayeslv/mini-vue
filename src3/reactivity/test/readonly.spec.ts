@@ -1,6 +1,6 @@
 import { readonly } from "../reactive";
 
-describe("readonly", () => {
+describe.skip("readonly", () => {
   it("happy path", () => {
     // readonly和reactive没太大区别，但是它不能被 set（不会触发依赖）
     const original = { foo: 1, bar: { baz: 2 } };
