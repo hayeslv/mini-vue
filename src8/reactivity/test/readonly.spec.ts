@@ -1,6 +1,6 @@
 import { isReadonly, readonly, isProxy } from "../reactive";
 
-describe.skip("readonly", () => {
+describe("readonly", () => {
   it("happy path", () => {
     const original = { foo: 1, bar: { baz: 2 } };
     const wrapped = readonly(original);
