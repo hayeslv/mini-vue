@@ -2,7 +2,7 @@ import { effect } from "../effect";
 import { reactive } from "../reactive";
 import { isRef, proxyRefs, ref, unRef } from "../ref";
 
-describe.skip("ref", () => {
+describe("ref", () => {
   it("happy path", () => {
     const a = ref(1);
     expect(a.value).toBe(1);
