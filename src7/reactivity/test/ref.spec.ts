@@ -1,7 +1,8 @@
 import { effect } from "../effect";
-import { ref } from "../ref";
+import { reactive } from "../reactive";
+import { isRef, ref, unRef } from "../ref";
 
-describe.skip("ref", () => {
+describe("ref", () => {
   it("happy path", () => {
     const a = ref(1);
     expect(a.value).toBe(1);
@@ -10,26 +11,23 @@ describe.skip("ref", () => {
     const a = ref(1);
     let dummy;
     let calls = 0;
-    // 依赖收集
     effect(() => {
       calls++;
       dummy = a.value;
     });
-    
-    expect(dummy).toBe(1); // 说明effect调用了一次
-    expect(calls).toBe(1); // 说明获取到了a.value的值
 
-    a.value = 2; // 把它变成 2 的之后，下面两个值都需要改变
+    expect(dummy).toBe(1);
+    expect(calls).toBe(1);
+
+    a.value = 2;
     expect(calls).toBe(2);
     expect(dummy).toBe(2);
 
-    // same value should not trigger
     a.value = 2;
     expect(calls).toBe(2);
     expect(dummy).toBe(2);
   });
   it("should make nested properties reactive", () => {
-    // 在ref中，如果传入的value是一个Object对象，则转换成 reactive
     const a = ref({
       count: 1,
     });
@@ -41,4 +39,20 @@ describe.skip("ref", () => {
     a.value.count = 2;
     expect(dummy).toBe(2);
   });
+
+  it("isRef", () => {
+    const a = ref(1);
+    const user = reactive({
+      age: 1,
+    });
+    expect(isRef(a)).toBe(true);
+    // 值类型是不可能有__v_isRef的，返回的是 undefined。需要使用 !!
+    expect(isRef(1)).toBe(false); 
+    expect(isRef(user)).toBe(false);
+  });
+  it("unRef", () => {
+    const a = ref(1);
+    expect(unRef(a)).toBe(1);
+    expect(unRef(1)).toBe(1); 
+  })
 });
