@@ -1,8 +1,8 @@
 import { effect } from "../effect";
-import { reactive } from "../reactive";
+import { reactive } from "../reavtive";
 import { isRef, proxyRefs, ref, unRef } from "../ref";
 
-describe.skip("ref", () => {
+describe("ref", () => {
   it("happy path", () => {
     const a = ref(1);
     expect(a.value).toBe(1);
@@ -11,23 +11,26 @@ describe.skip("ref", () => {
     const a = ref(1);
     let dummy;
     let calls = 0;
+    // 依赖收集
     effect(() => {
       calls++;
       dummy = a.value;
     });
 
-    expect(dummy).toBe(1);
-    expect(calls).toBe(1);
+    expect(dummy).toBe(1); // 说明effect调用了一次
+    expect(calls).toBe(1); // 说明获取到了a.value的值
 
-    a.value = 2;
+    a.value = 2; // 把它变成 2 的之后，下面两个值都需要改变
     expect(calls).toBe(2);
     expect(dummy).toBe(2);
 
+    // same value should not trigger
     a.value = 2;
     expect(calls).toBe(2);
     expect(dummy).toBe(2);
   });
   it("should make nested properties reactive", () => {
+    // 在ref中，如果传入的value是一个Object对象，则转换成 reactive
     const a = ref({
       count: 1,
     });
@@ -39,7 +42,6 @@ describe.skip("ref", () => {
     a.value.count = 2;
     expect(dummy).toBe(2);
   });
-
   it("isRef", () => {
     const a = ref(1);
     const user = reactive({
@@ -55,26 +57,21 @@ describe.skip("ref", () => {
     expect(unRef(1)).toBe(1);
   });
   it("proxyRefs", () => {
-    // user中的age是一个 ref 类型
     const user = {
-      age: ref(18),
+      age: ref(10),
       name: "xiaohong",
     };
-
-    // ref类型只要给到proxyRefs之后，我们在后续去访问里面 ref 类型的时候，就可以省略.value了
-    // 场景：使用在 template 里面，setup可能会返回 ref 值，但是在template里面不需要 .value
     const proxyUser = proxyRefs(user);
-    expect(user.age.value).toBe(18);
-    expect(proxyUser.age).toBe(18);
+    expect(user.age.value).toBe(10);
+    expect(proxyUser.age).toBe(10);
     expect(proxyUser.name).toBe("xiaohong");
 
-    // set逻辑
     proxyUser.age = 20;
     expect(proxyUser.age).toBe(20);
     expect(user.age.value).toBe(20);
 
-    proxyUser.age = ref(10);
-    expect(proxyUser.age).toBe(10);
-    expect(user.age.value).toBe(10);
+    proxyUser.age = ref(10)
+    expect(proxyUser.age).toBe(10)
+    expect(user.age.value).toBe(10)
   });
 });

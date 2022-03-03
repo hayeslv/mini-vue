@@ -1,7 +1,7 @@
 import { computed } from "../computed";
-import { reactive } from "../reactive";
+import { reactive } from "../reavtive";
 
-describe.skip("computed", () => {
+describe("computed", () => {
   it("happy path", () => {
     const user = reactive({
       age: 1,
@@ -9,11 +9,9 @@ describe.skip("computed", () => {
     const age = computed(() => {
       return user.age;
     });
-
     expect(age.value).toBe(1);
   });
   it("should compute lazily", () => {
-    // 计算属性可以缓存
     const value = reactive({
       foo: 1,
     });
@@ -22,18 +20,17 @@ describe.skip("computed", () => {
     });
     const cValue = computed(getter);
 
-    // 懒执行：如果没有调用cValue.value的话，getter不会调用
+    // lazy
     expect(getter).not.toHaveBeenCalled();
-
     expect(cValue.value).toBe(1);
     expect(getter).toHaveBeenCalledTimes(1);
 
-    // 当我们再次触发get操作，需要验证 getter 还是只被调用了一次
+    // should not compute again
     cValue.value;
     expect(getter).toHaveBeenCalledTimes(1);
 
-    // 当我们响应式的值发生改变了
-    value.foo = 2; // set 触发 trigger -> effect -> get 重新执行
+    // should not compute until needed
+    value.foo = 2;
     expect(getter).toHaveBeenCalledTimes(1);
 
     expect(cValue.value).toBe(2);
@@ -41,6 +38,5 @@ describe.skip("computed", () => {
 
     cValue.value;
     expect(getter).toHaveBeenCalledTimes(2);
-
   });
 });

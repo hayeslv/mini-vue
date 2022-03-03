@@ -1,5 +1,5 @@
 import { effect, stop } from "../effect";
-import { reactive } from "../reactive";
+import { reactive } from "../reavtive";
 
 describe("effect", () => {
   // 核心代码逻辑
@@ -21,6 +21,8 @@ describe("effect", () => {
     user.age++;
     expect(nextAge).toBe(12);
   });
+  
+
   it("should return runner when call effect", () => {
     // 调用effect（fn）之后，其实是会返回一个 function（runner） 的，当调用 function 时会再次调用 传给 effect 的 fn 函数 ，当调用 fn 的时候会把 fn 的返回值返回出去
     let foo = 10;
@@ -33,6 +35,7 @@ describe("effect", () => {
     expect(foo).toBe(12);
     expect(r).toBe("fooo");
   });
+
   it("scheduler", () => {
     // 1. 通过 effect 的第二个参数给定了一个 scheduler 的函数
     // 2. effect 第一次执行的时候，还会执行 fn
@@ -61,6 +64,7 @@ describe("effect", () => {
     run();
     expect(dummy).toBe(2);
   });
+
   it("stop", () => {
     let dummy;
     const obj = reactive({ prop: 1 });
@@ -71,13 +75,15 @@ describe("effect", () => {
     expect(dummy).toBe(2);
     // 调用 stop 的时候，应该把当前 effect 从 deps 中删除掉
     stop(runner);
-    obj.prop = 3;
+    // obj.prop = 3;
+    obj.prop++
     expect(dummy).toBe(2);
 
     // stop只是终止“依赖触发”的 effect 执行，不影响返回的 runner 函数
     runner();
     expect(dummy).toBe(3);
   });
+
   it("onStop", () => {
     // 当用户调用 stop 之后，onStop 会被执行
     const obj = reactive({
