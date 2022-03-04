@@ -21,4 +21,45 @@ describe("effect", () => {
     user.age++;
     expect(nextAge).toBe(12);
   });
+  it("should return runner when call effect", () => {
+    // 调用effect（fn）之后，其实是会返回一个 function（runner） 的，当调用 function 时会再次调用 传给 effect 的 fn 函数 ，当调用 fn 的时候会把 fn 的返回值返回出去
+    let foo = 10;
+    const runner = effect(() => {
+      foo++;
+      return "fooo";
+    });
+    expect(foo).toBe(11);
+    const r = runner();
+    expect(foo).toBe(12);
+    expect(r).toBe("fooo");
+  });
+
+  it("scheduler", () => {
+    // 1. 通过 effect 的第二个参数给定了一个 scheduler 的函数
+    // 2. effect 第一次执行的时候，还会执行 fn
+    // 3. 当响应式对象 set update 的时候，不会执行 fn，而是执行 scheduler
+    // 4. 如果执行 runner 的时候，会再次执行 fn
+    let dummy;
+    let run: any;
+    const scheduler = jest.fn(() => {
+      run = runner;
+    });
+    const obj = reactive({ foo: 1 });
+    const runner = effect(
+      () => {
+        dummy = obj.foo;
+      },
+      { scheduler }
+    );
+    expect(scheduler).not.toHaveBeenCalled();
+    expect(dummy).toBe(1);
+    // 第一次触发依赖
+    obj.foo++;
+    expect(scheduler).toHaveBeenCalledTimes(1);
+    // effect 回调函数应该没有再被执行
+    expect(dummy).toBe(1);
+    // 直接执行 run 方法
+    run();
+    expect(dummy).toBe(2);
+  });
 });
