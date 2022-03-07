@@ -1,4 +1,4 @@
-import { isReadonly, readonly } from "../reactive";
+import { isProxy, isReadonly, readonly } from "../reactive";
 
 describe("readonly", () => {
   it("happy path", () => {
@@ -13,6 +13,9 @@ describe("readonly", () => {
     // readonly嵌套
     expect(isReadonly(wrapped.bar)).toBe(true);
     expect(isReadonly(original.bar)).toBe(false);
+    
+    // 使用 isProxy检测对象
+    expect(isProxy(wrapped)).toBe(true);
   });
 
   it("warn then call set", () => {
