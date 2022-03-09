@@ -5,6 +5,9 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
+  // TODO 判断vnode是不是一个 element
+  // processElement()
+
   // 处理组件
   processComponent(vnode, container);
 }
