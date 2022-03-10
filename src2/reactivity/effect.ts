@@ -1,4 +1,4 @@
-import { extend } from "../shared";
+import { extend } from "../shared/index";
 
 class ReactiveEffect {
   private _fn: any;
@@ -20,7 +20,7 @@ class ReactiveEffect {
     // !代码优化，第一步：提取成函数
     // cleanupEffect(this);
 
-    // !代码优化，第二步：可能会频繁调用stop，给个状态后，及时外部多次调用stop，也只会清空一次
+    // !代码优化，第二步：可能会频繁调用stop，给个状态后，即使外部多次调用stop，也只会清空一次
     if (this.active) {
       cleanupEffect(this);
       if(this.onStop) {
@@ -57,7 +57,7 @@ export function track(target, key) {
   if(!activeEffect) return;
 
   dep.add(activeEffect);
-  activeEffect.deps.push(dep); // 反向添加：effect可以知道自己存储在哪些 dep 中
+  activeEffect.deps.push(dep); // 反向收集：effect可以知道自己被存储在哪些 dep 中
 }
 
 export function trigger(target, key) {
@@ -98,3 +98,4 @@ export function effect(fn, options: any = {}) {
 export function stop(runner) {
   runner.effect.stop();
 }
+ 
