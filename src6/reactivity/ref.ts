@@ -28,7 +28,7 @@ class RefImpl {
     if (hasChanged(this._rawValue, newValue)) {
       this._rawValue = newValue;
       // 一定要先修改 value 的值，在去通知
-      this._value = isObject(newValue) ? reactive(newValue) : newValue;
+      // this._value = isObject(newValue) ? reactive(newValue) : newValue;
       this._value = convert(newValue);
       // 触发依赖
       triggerEffects(this.dep);
