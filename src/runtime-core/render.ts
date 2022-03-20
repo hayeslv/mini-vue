@@ -19,7 +19,7 @@ function processElement(vnode, container) {
 }
 
 function mountElement(vnode, container) {
-  const el = document.createElement(vnode.type)
+  const el = vnode.el = document.createElement(vnode.type)
   // children可能是：string、array
   const { props, children }  = vnode
 
@@ -52,16 +52,20 @@ function processComponent(vnode, container) {
   // TODO 更新组件
 }
 
-function mountComponent(vnode, container) {
+function mountComponent(initinalVNode, container) {
   // 抽离出 instance 实例，表示组件实例
-  const instance = createComponentInstance(vnode)
+  const instance = createComponentInstance(initinalVNode)
   setupComponent(instance)
   setupRenderEffect(instance, container)
 }
 
 function setupRenderEffect(instance, container) {
+  const { proxy, vnode } = instance
   // 虚拟节点树
-  const subTree = instance.render()
+  const subTree = instance.render.call(proxy)
   patch(subTree, container)
+
+  // 此处可以确定所有的 element 都被 mount 了
+  vnode.el = subTree.el
 }
 
