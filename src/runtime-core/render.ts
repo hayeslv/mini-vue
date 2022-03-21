@@ -37,18 +37,23 @@ function mountElement(vnode, container) {
     mountChildren(vnode, el)
   }
 
-  // if(typeof children === "string") {
-  //   el.textContent = children
-  // }else if(Array.isArray(children)) {
-  //   // children 中每个都是 vnode，需要继续调用 patch，来判断是element类型还是component类型，并对齐初始化
-  //   // children.forEach(v => patch(v, el))
-  //   mountChildren(vnode, el)
-  // }
-
   // props
   for (const key in props) {
     const val = props[key]
-    el.setAttribute(key, val)
+
+    // 判断是否是事件的命名规范
+    const isOn = (key: string) => /^on[A-Z]/.test(key); 
+    if(isOn(key)) {
+      const event = key.slice(2).toLowerCase()
+      el.addEventListener(event, val)
+    } else {
+      el.setAttribute(key, val)
+    }
+    // if(key === "onClick") {
+    //   el.addEventListener("click", val)
+    // } else {
+    //   el.setAttribute(key, val)
+    // }
   }
 
   container.append(el)

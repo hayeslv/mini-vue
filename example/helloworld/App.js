@@ -9,6 +9,13 @@ export const App = {
       "div", 
       {
         id: "root",
+        class: "red",
+        onClick() {
+          console.log('my click');
+        },
+        onMousedown() {
+          console.log('mouse downnnnn');
+        }
       },
       "hi, " + this.msg
     )
