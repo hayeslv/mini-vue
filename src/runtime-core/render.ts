@@ -1,4 +1,5 @@
 import { isObject } from "../shared/index";
+import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component"
 
 export function render(vnode, container) {
@@ -6,11 +7,18 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
-  if(typeof vnode.type === "string") {
+  const { shapeFlag } = vnode
+  if(shapeFlag & ShapeFlags.ELEMENT) {
     processElement(vnode, container)
-  } else if(isObject(vnode.type)) {
+  } else if(shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     processComponent(vnode, container)
   }
+
+  // if(typeof vnode.type === "string") {
+  //   processElement(vnode, container)
+  // } else if(isObject(vnode.type)) {
+  //   processComponent(vnode, container)
+  // }
 }
 
 function processElement(vnode, container) {
@@ -21,15 +29,21 @@ function processElement(vnode, container) {
 function mountElement(vnode, container) {
   const el = vnode.el = document.createElement(vnode.type)
   // children可能是：string、array
-  const { props, children }  = vnode
+  const { props, children, shapeFlag }  = vnode
 
-  if(typeof children === "string") {
+  if(shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children
-  }else if(Array.isArray(children)) {
-    // children 中每个都是 vnode，需要继续调用 patch，来判断是element类型还是component类型，并对齐初始化
-    // children.forEach(v => patch(v, el))
+  } else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(vnode, el)
   }
+
+  // if(typeof children === "string") {
+  //   el.textContent = children
+  // }else if(Array.isArray(children)) {
+  //   // children 中每个都是 vnode，需要继续调用 patch，来判断是element类型还是component类型，并对齐初始化
+  //   // children.forEach(v => patch(v, el))
+  //   mountChildren(vnode, el)
+  // }
 
   // props
   for (const key in props) {
