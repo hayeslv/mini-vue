@@ -14,6 +14,7 @@ export function createComponentInstance(vnode){
     emit: () => {}
   }
 
+  // 填充emit的第一个参数（instance）
   component.emit = emit.bind(null, component) as any;
 
   return component

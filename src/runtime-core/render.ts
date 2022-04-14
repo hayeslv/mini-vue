@@ -1,24 +1,41 @@
 import { isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component"
+import { Fragment, Text } from "./vnode";
 
 export function render(vnode, container) {
   patch(vnode, container)
 }
 
 function patch(vnode, container) {
-  const { shapeFlag } = vnode
-  if(shapeFlag & ShapeFlags.ELEMENT) {
-    processElement(vnode, container)
-  } else if(shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    processComponent(vnode, container)
-  }
+  const { type, shapeFlag } = vnode
 
-  // if(typeof vnode.type === "string") {
-  //   processElement(vnode, container)
-  // } else if(isObject(vnode.type)) {
-  //   processComponent(vnode, container)
-  // }
+  // Fragment -> 只渲染 children
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, container);
+      break;
+    case Text:
+      processText(vnode, container);
+      break;
+    default:
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(vnode, container)
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        processComponent(vnode, container)
+      }
+      break;
+  }
+}
+
+function processText(vnode, container) {
+  const { children } = vnode
+  const textNode = vnode.el = document.createTextNode(children)
+  container.append(textNode)
+}
+
+function processFragment(vnode, container) {
+  mountChildren(vnode, container) // 渲染全部children
 }
 
 function processElement(vnode, container) {
@@ -29,11 +46,11 @@ function processElement(vnode, container) {
 function mountElement(vnode, container) {
   const el = vnode.el = document.createElement(vnode.type)
   // children可能是：string、array
-  const { props, children, shapeFlag }  = vnode
+  const { props, children, shapeFlag } = vnode
 
-  if(shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children
-  } else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(vnode, el)
   }
 
@@ -42,8 +59,8 @@ function mountElement(vnode, container) {
     const val = props[key]
 
     // 判断是否是事件的命名规范
-    const isOn = (key: string) => /^on[A-Z]/.test(key); 
-    if(isOn(key)) {
+    const isOn = (key: string) => /^on[A-Z]/.test(key);
+    if (isOn(key)) {
       const event = key.slice(2).toLowerCase()
       el.addEventListener(event, val)
     } else {

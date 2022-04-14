@@ -1,4 +1,4 @@
-import { h } from '../../lib/guide-mini-vue.esm.js'
+import { h, createTextVNode } from '../../lib/guide-mini-vue.esm.js'
 import { Foo } from './Foo.js';
 
 export const App = {
@@ -6,7 +6,10 @@ export const App = {
   render() {
     const app = h("div", {}, "App")
     const foo = h(Foo, {}, {
-      header: ({age}) => h("p", {}, "headerrrrr" + age),
+      header: ({age}) => [
+        h("p", {}, "headerrrrr" + age),
+        createTextVNode("哈哈哈") // 渲染的时候必须是虚拟节点，这里把它转换成虚拟节点
+      ],
       footer: () => h("p", {}, "footerrrrrr"),
     })
 

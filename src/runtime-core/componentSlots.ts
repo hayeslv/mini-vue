@@ -1,5 +1,6 @@
 import { ShapeFlags } from "../shared/ShapeFlags"
 
+
 export function initSlots(instance, children) {
   // 检查一下是否需要slots处理
   const { vnode } = instance
