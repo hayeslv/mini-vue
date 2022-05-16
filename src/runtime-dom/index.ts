@@ -14,9 +14,9 @@ function patchProp(el, key, val) {
   }
 }
 
-function insert(el, parent) { 
+function insert(el, parent) {
   parent.append(el)
- }
+}
 
 const renderer: any = createRenderer({
   createElement,

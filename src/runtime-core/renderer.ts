@@ -1,3 +1,4 @@
+import { effect } from "../reactivity/effect";
 import { isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component"
@@ -13,43 +14,53 @@ export function createRenderer(options){
   } = options
 
   function render(vnode, container) {
-    patch(vnode, container, null)
+    patch(null, vnode, container, null)
   }
 
-  function patch(vnode, container, parentComponent) {
-    const { type, shapeFlag } = vnode
+  // n1 -> 老的虚拟节点
+  // n2 -> 新的虚拟节点
+  function patch(n1, n2, container, parentComponent) {
+    const { type, shapeFlag } = n2
   
     // Fragment -> 只渲染 children
     switch (type) {
       case Fragment:
-        processFragment(vnode, container, parentComponent);
+        processFragment(n1, n2, container, parentComponent);
         break;
       case Text:
-        processText(vnode, container);
+        processText(n1, n2, container);
         break;
       default:
         if (shapeFlag & ShapeFlags.ELEMENT) {
-          processElement(vnode, container, parentComponent)
+          processElement(n1, n2, container, parentComponent)
         } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-          processComponent(vnode, container, parentComponent)
+          processComponent(n1, n2, container, parentComponent)
         }
         break;
     }
   }
   
-  function processText(vnode, container) {
-    const { children } = vnode
-    const textNode = vnode.el = document.createTextNode(children)
+  function processText(n1, n2, container) {
+    const { children } = n2
+    const textNode = n2.el = document.createTextNode(children)
     container.append(textNode)
   }
   
-  function processFragment(vnode, container, parentComponent) {
-    mountChildren(vnode, container, parentComponent) // 渲染全部children
+  function processFragment(n1, n2, container, parentComponent): void {
+    mountChildren(n2, container, parentComponent) // 渲染全部children
   }
   
-  function processElement(vnode, container, parentComponent) {
-    // element 类型也分为 mount 和 update，这里先实现mount
-    mountElement(vnode, container, parentComponent)
+  function processElement(n1, n2, container, parentComponent) {
+    // element 类型也分为 mount 和 update
+    if(!n1) {
+      mountElement(n2, container, parentComponent)
+    } else {
+      patchElement(n1, n2, container)
+    }
+  }
+
+  function patchElement(n1, n2, container) {
+    console.log("patchElement");
   }
   
   function mountElement(vnode, container, parentComponent) {
@@ -87,13 +98,13 @@ export function createRenderer(options){
   
   function mountChildren(vnode, container, parentComponent) {
     vnode.children.forEach(v => {
-      patch(v, container, parentComponent)
+      patch(null, v, container, parentComponent)
     })
   }
   
-  function processComponent(vnode, container, parentComponent) {
+  function processComponent(n1, n2, container, parentComponent) {
     // 挂载组件
-    mountComponent(vnode, container, parentComponent)
+    mountComponent(n2, container, parentComponent)
     // TODO 更新组件
   }
   
@@ -105,13 +116,29 @@ export function createRenderer(options){
   }
   
   function setupRenderEffect(instance, container) {
-    const { proxy, vnode } = instance
-    // 虚拟节点树
-    const subTree = instance.render.call(proxy)
-    patch(subTree, container, instance)
-  
-    // 此处可以确定所有的 element 都被 mount 了
-    vnode.el = subTree.el
+    effect(() => {
+      if(!instance.isMounted) { // 初始化
+        const { proxy, vnode } = instance
+        // 虚拟节点树
+        const subTree = instance.subTree = instance.render.call(proxy)
+        patch(null, subTree, container, instance)
+      
+        // 此处可以确定所有的 element 都被 mount 了
+        vnode.el = subTree.el
+
+        instance.isMounted = true;
+      } else { // 更新
+        const { proxy, vnode } = instance
+        // 虚拟节点树
+        const subTree = instance.render.call(proxy)
+        const preSubTree = instance.subTree
+
+        instance.subTree = subTree // 更新 subTree
+
+        patch(preSubTree, subTree, container, instance)
+
+      }
+    })
   }
 
   return {
