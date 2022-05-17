@@ -1,4 +1,5 @@
 export const enum NodeTypes {
   INTERPOLATION,
-  SIMPLE_EXORESSION
+  SIMPLE_EXORESSION,
+  ELEMENT
 }
