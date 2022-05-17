@@ -154,7 +154,54 @@ export function createRenderer(options){
         i++
       }
     } else {
-      // 5.乱序的部分
+      // 5.中间对比
+      let s1 = i; // 老节点的开始
+      let s2 = i; // 新节点的开始
+
+      const toBePatched = e2 - s2 + 1;
+      let patched = 0;
+
+      // 映射表
+      const keyToNewIndexMap = new Map()
+      // 根据新节点建立映射表
+      for(let i = s2; i <= e2; i++) {
+        const nextChild = c2[i]
+        keyToNewIndexMap.set(nextChild.key, i)
+      }
+
+      // 根据映射表对比老节点，遍历中间的部分
+      for(let i = s1; i <= e1; i++) {
+        const prevChild = c1[i]
+
+        if(patched >= toBePatched) {
+          // patch 处理的元素，大于等于总数量的话，就可以直接移除掉了（肯定是老节点多出来的）
+          hostRemove(prevChild.el)
+          continue
+        }
+
+        let newIndex 
+        if(prevChild.key !== null || prevChild.key !== undefined) {
+          newIndex = keyToNewIndexMap.get(prevChild.key)
+        } else {
+          // 用户没有给key
+          for(let j = s2; j < e2; j++) {
+            if(isSameVNodeType(prevChild, c2[j])) {
+              newIndex = j
+              break
+            }
+          }
+        }
+
+        if(newIndex === undefined) {
+          // 当前节点在新的中不存在，删除
+          hostRemove(prevChild.el)
+        } else {
+          // 存在则继续patch
+          patch(prevChild, c2[newIndex], container, parentComponent, null)
+          patched++
+        }
+
+      }
     }
 
 
