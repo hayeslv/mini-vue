@@ -23,9 +23,33 @@ function parseChildren(context) {
       node = parseElement(context)
     }
   }
+
+  if(!node) {
+    // 如果node没有值，那么就当作text来解析
+    node = parseText(context)
+  }
+
   nodes.push(node)
 
   return nodes
+}
+
+function parseText(context: any) {
+  const content = parseTextData(context, context.source.length)
+
+  return {
+    type: NodeTypes.TEXT,
+    content
+  }
+}
+
+function parseTextData(context: any, length) {
+  // 1.获取当前的内容（content）
+  const content = context.source.slice(0, length)
+
+  // 2.删除（推进）
+  advanceBy(context, length)
+  return content
 }
 
 function parseElement(context: any) {
@@ -61,7 +85,9 @@ function parseInterPolation(context) {
   advanceBy(context, openDelimiter.length)
 
   const rawContentLength = closeIndex - openDelimiter.length
-  const rawContent = context.source.slice(0, rawContentLength)
+  // const rawContent = context.source.slice(0, rawContentLength)
+  const rawContent = parseTextData(context, rawContentLength)
+
   const content = rawContent.trim()
 
   advanceBy(context, rawContentLength + closeDelimiter.length)
