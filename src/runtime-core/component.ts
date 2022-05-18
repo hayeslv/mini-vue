@@ -82,6 +82,13 @@ function handleSetupResult(instance, setupResult) {
 
 function finishComponentSetup(instance) {
   const Component = instance.type
+
+  if(compiler && !Component.render) {
+    if(Component.template) {
+      Component.render = compiler(Component.template)
+    }
+  }
+  // template
   instance.render = Component.render
 }
 
@@ -95,5 +102,11 @@ export function getCurrentInstance(){
 // 好处：当我们后续想要跟踪 currentInstance 被谁赋值的时候，我们只需要在这里操作就可以了
 export function setCurrentInstance(instance){
   currentInstance = instance
+}
+
+let compiler
+
+export function registerRuntimeCompiler(_compiler){
+  compiler = _compiler
 }
 

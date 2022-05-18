@@ -345,7 +345,7 @@ export function createRenderer(options){
       if(!instance.isMounted) { // 初始化
         const { proxy, vnode } = instance
         // 虚拟节点树
-        const subTree = instance.subTree = instance.render.call(proxy)
+        const subTree = instance.subTree = instance.render.call(proxy, proxy)
         patch(null, subTree, container, instance, anchor)
       
         // 此处可以确定所有的 element 都被 mount 了
@@ -360,7 +360,7 @@ export function createRenderer(options){
           updateComponentPreRender(instance, next)
         }
         // 虚拟节点树
-        const subTree = instance.render.call(proxy)
+        const subTree = instance.render.call(proxy, proxy)
         const preSubTree = instance.subTree
 
         instance.subTree = subTree // 更新 subTree
