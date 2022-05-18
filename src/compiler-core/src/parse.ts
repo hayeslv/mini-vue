@@ -154,7 +154,8 @@ function parseInterPolation(context) {
 
 function createRoot(children) {
   return {
-    children
+    children,
+    type: NodeTypes.ROOT
   }
 }
 
