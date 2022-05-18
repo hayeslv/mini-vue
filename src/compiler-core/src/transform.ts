@@ -9,6 +9,8 @@ export function transform(root, options = {}) {
   // 2.修改 text content
   createRootCodegen(root)
 
+  root.helpers = [...context.helpers.keys()]
+
 }
 
 // 稳定的程序执行流程
@@ -17,6 +19,12 @@ function traverseNode(node: any, context) {
   for (let i = 0; i < nodeTransforms.length; i++) {
     const transform = nodeTransforms[i]
     transform(node)
+  }
+
+  switch(node.type) {
+    case NodeTypes.INTERPOLATION:
+      context.helper("toDisplayString")
+      break;
   }
 
   traverseChildren(node, context);
@@ -36,7 +44,11 @@ function traverseChildren(node: any, context: any) {
 function createTransformContext(root: any, options: any) {
   const context = {
     root,
-    nodeTransforms: options.nodeTransforms || []
+    nodeTransforms: options.nodeTransforms || [],
+    helpers: new Map(),
+    helper(key) {
+      context.helpers.set(key, 1);
+    }
   }
   return context;
 }
