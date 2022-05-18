@@ -17,19 +17,26 @@ export function transform(root, options = {}) {
 // 稳定的程序执行流程
 function traverseNode(node: any, context) {
   const nodeTransforms = context.nodeTransforms
+  const exitFns: any[] = []
   for (let i = 0; i < nodeTransforms.length; i++) {
     const transform = nodeTransforms[i]
-    transform(node, context)
+    const onExit = transform(node, context)
+    if(onExit) exitFns.push(onExit)
   }
 
   switch (node.type) {
     case NodeTypes.INTERPOLATION:
       context.helper(TO_DISPLAY_STRING)
       break;
-    case NodeTypes.ROOT: 
+    case NodeTypes.ROOT:
     case NodeTypes.ELEMENT:
       traverseChildren(node, context);
       break
+  }
+
+  let i = exitFns.length
+  while(i--) {
+    exitFns[i]()
   }
 
 }
@@ -56,6 +63,11 @@ function createTransformContext(root: any, options: any) {
 }
 
 function createRootCodegen(root: any) {
-  root.codegenNode = root.children[0]
+  const child = root.children[0]
+  if (child.type === NodeTypes.ELEMENT) {
+    root.codegenNode = child.codegenNode
+  } else {
+    root.codegenNode = root.children[0]
+  }
 }
 
