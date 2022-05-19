@@ -5,21 +5,30 @@ const targetMap = new Map()
 class ReactiveEffect {
   private _fn: any
   deps = []
+  active = true
   constructor(fn, public scheduler?) {
     this._fn = fn
   }
   run() {
     // 调用 run 的时候表示当前 effect 是正在执行的状态，把它赋值给 activeEffect
     activeEffect = this
-    
+
     // 当调用用户传入的 fn 之后，需要把 fn 的返回值给返回出去
     return this._fn()
   }
   stop() {
-    this.deps.forEach((dep: any) => {
-      dep.delete(this)
-    })
+    if(this.active) {
+      this.active = false
+      cleanupEffect(this)
+    }
   }
+}
+
+function cleanupEffect(effect) {
+  effect.deps.forEach((dep: any) => {
+    dep.delete(effect)
+  })
+  effect.deps.length = 0
 }
 
 export function track(target, key) {
@@ -38,7 +47,7 @@ export function track(target, key) {
   }
 
   // activeEffect有可能是undefined，因为有可能是单纯的reactive，并没有使用 effect
-  if(!activeEffect) return
+  if (!activeEffect) return
   // effect收集依赖的过程是在run方法执行中
   // 所以是先执行run方法，这里可以保证 activeEffect 已经有值了
   dep.add(activeEffect)
@@ -53,7 +62,7 @@ export function trigger(target, key) {
 
   for (const effect of dep) {
     // 触发依赖的时候，看看effect中是否有 scheduler，如果有的话就执行，没有的话才会执行run方法
-    if(effect.scheduler) {
+    if (effect.scheduler) {
       effect.scheduler()
     } else {
       effect.run()
@@ -78,6 +87,6 @@ export function effect(fn, options: any = {}) {
   return runner
 }
 
-export function stop(runner){
+export function stop(runner) {
   runner.effect.stop();
 }
