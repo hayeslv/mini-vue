@@ -81,4 +81,23 @@ describe("effect", () => {
     runner();
     expect(dummy).toBe(3);
   });
+  it("onStop", () => {
+    // 当用户调用 stop 之后，onStop 会被执行
+    const obj = reactive({
+      foo: 1,
+    });
+    const onStop = jest.fn();
+    let dummy;
+    const runner = effect(
+      () => {
+        dummy = obj.foo;
+      },
+      {
+        onStop,
+      }
+    );
+
+    stop(runner);
+    expect(onStop).toHaveBeenCalledTimes(1);
+  });
 });

@@ -1,3 +1,4 @@
+import { extend } from "../shared"
 
 let activeEffect
 const targetMap = new Map()
@@ -6,6 +7,7 @@ class ReactiveEffect {
   private _fn: any
   deps = []
   active = true
+  onStop?: () => void
   constructor(fn, public scheduler?) {
     this._fn = fn
   }
@@ -20,6 +22,9 @@ class ReactiveEffect {
     if(this.active) {
       this.active = false
       cleanupEffect(this)
+      if(this.onStop) {
+        this.onStop()
+      }
     }
   }
 }
@@ -74,6 +79,8 @@ export function effect(fn, options: any = {}) {
   // 封装，用类进行表示
   // 接收 options 对象，获取scheduler
   const _effect = new ReactiveEffect(fn, options.scheduler)
+
+  extend(_effect, options)
 
   // 当调用effect的时候，直接执行内部的fn（封装在run方法中）
   _effect.run()
