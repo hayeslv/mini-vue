@@ -34,4 +34,34 @@ describe("effect", () => {
     expect(foo).toBe(12); // 验证内部函数fn，是否被执行了
     expect(r).toBe("fooo"); // 验证对应的返回值
   });
+  it("scheduler", () => {
+    let dummy;
+    let run: any;
+    const scheduler = jest.fn(() => {
+      run = runner;
+    });
+    const obj = reactive({ foo: 1 });
+    // 先调用 effect，传入 fn
+    // 第二个参数是一个对象，里面有一个 scheduler
+    const runner = effect(
+      () => {
+        dummy = obj.foo;
+      },
+      { scheduler }
+    );
+    // 验证 scheduler 一开始不会被调用
+    expect(scheduler).not.toHaveBeenCalled();
+    // 验证一开始会执行 fn
+    expect(dummy).toBe(1);
+    // 第一次触发依赖
+    obj.foo++;
+    // 验证 scheduler 被执行了一次
+    expect(scheduler).toHaveBeenCalledTimes(1);
+    // 验证 effect 回调函数（fn）没有再被执行
+    expect(dummy).toBe(1);
+    // 直接执行 run 方法
+    run();
+    // 验证 run 可以执行 fn 
+    expect(dummy).toBe(2);
+  });
 });

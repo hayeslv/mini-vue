@@ -4,7 +4,7 @@ const targetMap = new Map()
 
 class ReactiveEffect {
   private _fn: any
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn
   }
   run() {
@@ -42,13 +42,19 @@ export function trigger(target, key) {
   let dep = depsMap.get(key)
 
   for (const effect of dep) {
-    effect.run()
+    // 触发依赖的时候，看看effect中是否有 scheduler，如果有的话就执行，没有的话才会执行run方法
+    if(effect.scheduler) {
+      effect.scheduler()
+    } else {
+      effect.run()
+    }
   }
 }
 
-export function effect(fn) {
+export function effect(fn, options: any = {}) {
   // 封装，用类进行表示
-  const _effect = new ReactiveEffect(fn)
+  // 接收 options 对象，获取scheduler
+  const _effect = new ReactiveEffect(fn, options.scheduler)
 
   // 当调用effect的时候，直接执行内部的fn（封装在run方法中）
   _effect.run()
