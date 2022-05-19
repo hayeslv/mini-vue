@@ -21,4 +21,17 @@ describe("effect", () => {
     user.age++;
     expect(nextAge).toBe(12);
   });
+  it("should return runner when call effect", () => {
+    let foo = 10;
+    // 返回一个 runner 函数
+    const runner = effect(() => {
+      foo++;
+      return "fooo";
+    });
+    expect(foo).toBe(11);
+    // 调用 runner 函数的时候，可以拿到返回值 r；并且fn也应该被执行了
+    const r = runner();
+    expect(foo).toBe(12); // 验证内部函数fn，是否被执行了
+    expect(r).toBe("fooo"); // 验证对应的返回值
+  });
 });

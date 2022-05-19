@@ -10,7 +10,9 @@ class ReactiveEffect {
   run() {
     // 调用 run 的时候表示当前 effect 是正在执行的状态，把它赋值给 activeEffect
     activeEffect = this
-    this._fn()
+    
+    // 当调用用户传入的 fn 之后，需要把 fn 的返回值给返回出去
+    return this._fn()
   }
 }
 
@@ -50,5 +52,9 @@ export function effect(fn) {
 
   // 当调用effect的时候，直接执行内部的fn（封装在run方法中）
   _effect.run()
+
+  // runner需要调用fn，相当于run方法的功能
+  // 在 _effect.run 里面涉及到 this 指针的问题
+  return _effect.run.bind(_effect)
 }
 
