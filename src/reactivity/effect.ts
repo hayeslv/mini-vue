@@ -4,6 +4,7 @@ const targetMap = new Map()
 
 class ReactiveEffect {
   private _fn: any
+  deps = []
   constructor(fn, public scheduler?) {
     this._fn = fn
   }
@@ -13,6 +14,11 @@ class ReactiveEffect {
     
     // 当调用用户传入的 fn 之后，需要把 fn 的返回值给返回出去
     return this._fn()
+  }
+  stop() {
+    this.deps.forEach((dep: any) => {
+      dep.delete(this)
+    })
   }
 }
 
@@ -31,9 +37,13 @@ export function track(target, key) {
     depsMap.set(key, dep)
   }
 
+  // activeEffect有可能是undefined，因为有可能是单纯的reactive，并没有使用 effect
+  if(!activeEffect) return
   // effect收集依赖的过程是在run方法执行中
   // 所以是先执行run方法，这里可以保证 activeEffect 已经有值了
   dep.add(activeEffect)
+  // 反向收集：effect可以知道自己被存储在哪些 dep 中
+  activeEffect.deps.push(dep)
 }
 
 export function trigger(target, key) {
@@ -61,6 +71,13 @@ export function effect(fn, options: any = {}) {
 
   // runner需要调用fn，相当于run方法的功能
   // 在 _effect.run 里面涉及到 this 指针的问题
-  return _effect.run.bind(_effect)
+  const runner: any = _effect.run.bind(_effect)
+  // 双向挂载：effect能得到 runner，runner中也保存effect
+  runner.effect = _effect
+
+  return runner
 }
 
+export function stop(runner){
+  runner.effect.stop();
+}

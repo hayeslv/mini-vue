@@ -1,4 +1,4 @@
-import { effect } from "../effect";
+import { effect, stop } from "../effect";
 import { reactive } from "../reactive";
 
 describe("effect", () => {
@@ -63,5 +63,22 @@ describe("effect", () => {
     run();
     // 验证 run 可以执行 fn 
     expect(dummy).toBe(2);
+  });
+  it("stop", () => {
+    let dummy;
+    const obj = reactive({ prop: 1 });
+    const runner = effect(() => {
+      dummy = obj.prop;
+    });
+    obj.prop = 2;
+    expect(dummy).toBe(2);
+    // 调用 stop 的时候，应该把当前 effect 从 deps 中删除掉
+    stop(runner);
+    obj.prop = 3;
+    expect(dummy).toBe(2); // 停止更新
+
+    // stop只是终止“依赖触发”的 effect 执行，不影响返回的 runner 函数
+    runner();
+    expect(dummy).toBe(3);
   });
 });
