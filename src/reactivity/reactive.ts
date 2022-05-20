@@ -26,6 +26,11 @@ export function isReadonly(value){
   return !!value[ReactiveFlags.IS_READONLY];
 }
 
+// 检测 object 是不是通过 reactive 或者 readonly 创建的
+export function isProxy(value) {
+  return isReactive(value) || isReadonly(value);
+}
+
 function createActiveObject(raw, baseHandlers) {
   return new Proxy(raw, baseHandlers);
 }

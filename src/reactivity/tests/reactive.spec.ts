@@ -1,4 +1,4 @@
-import { isReactive, reactive } from "../reactive";
+import { isProxy, isReactive, reactive } from "../reactive";
 
 describe("reactive", () => {
   it("happy path", () => {
@@ -12,6 +12,9 @@ describe("reactive", () => {
     // 判断这个对象是否是 reactive 类型
     expect(isReactive(observed)).toBe(true);
     expect(isReactive(original)).toBe(false);
+
+    // 使用 isProxy检测对象
+    expect(isProxy(observed)).toBe(true);
   });
   test("nested reactive", () => {
     // 嵌套了其他的 object
