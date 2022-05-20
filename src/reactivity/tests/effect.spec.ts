@@ -74,7 +74,8 @@ describe("effect", () => {
     expect(dummy).toBe(2);
     // 调用 stop 的时候，应该把当前 effect 从 deps 中删除掉
     stop(runner);
-    obj.prop = 3;
+    // obj.prop = 3;
+    obj.prop++
     expect(dummy).toBe(2); // 停止更新
 
     // stop只是终止“依赖触发”的 effect 执行，不影响返回的 runner 函数

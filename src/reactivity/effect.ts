@@ -1,6 +1,7 @@
 import { extend } from "../shared"
 
 let activeEffect
+let shouldTrack
 const targetMap = new Map()
 
 class ReactiveEffect {
@@ -12,11 +13,17 @@ class ReactiveEffect {
     this._fn = fn
   }
   run() {
+    if(!this.active) {
+      return this._fn()
+    }
     // 调用 run 的时候表示当前 effect 是正在执行的状态，把它赋值给 activeEffect
     activeEffect = this
+    shouldTrack = true
+    const result = this._fn()
+    // 执行完成 fn 后，关掉 shouldTrack。因为它是一个全局变量
+    shouldTrack = false 
 
-    // 当调用用户传入的 fn 之后，需要把 fn 的返回值给返回出去
-    return this._fn()
+    return result
   }
   stop() {
     if(this.active) {
@@ -53,6 +60,7 @@ export function track(target, key) {
 
   // activeEffect有可能是undefined，因为有可能是单纯的reactive，并没有使用 effect
   if (!activeEffect) return
+  if (!shouldTrack) return;
   // effect收集依赖的过程是在run方法执行中
   // 所以是先执行run方法，这里可以保证 activeEffect 已经有值了
   dep.add(activeEffect)
