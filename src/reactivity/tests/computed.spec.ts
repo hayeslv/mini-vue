@@ -31,6 +31,14 @@ describe("computed", () => {
     cValue.value;
     expect(getter).toHaveBeenCalledTimes(1);
 
-    
+    // 当我们响应式的值发生改变了
+    value.foo = 2; // set 触发 trigger -> effect -> get 重新执行
+    expect(getter).toHaveBeenCalledTimes(1);
+
+    expect(cValue.value).toBe(2);
+    expect(getter).toHaveBeenCalledTimes(2);
+
+    cValue.value;
+    expect(getter).toHaveBeenCalledTimes(2);
   });
 });
