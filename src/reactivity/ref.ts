@@ -1,3 +1,4 @@
+import { hasChanged } from "../shared"
 import { isTracking, trackEffects, triggerEffects } from "./effect"
 
 class RefImpl {
@@ -8,21 +9,25 @@ class RefImpl {
     this.dep = new Set()
   }
   get value() {
-    // 有可能 ref 的使用过程中，并没有 effect，那么就不需要进行依赖收集了
-    if(isTracking()){
-      // 收集依赖
-      trackEffects(this.dep)
-    }
+    trackRefValue(this)
 
     return this._value
   }
   set value(newValue) {
-    // 如果是相同的值，就直接 return 掉
-    if(Object.is(newValue, this._value)) return
+    // 如果值改变了，再执行
+    if(hasChanged(newValue, this._value)) {
+      this._value = newValue
+      // 触发依赖
+      triggerEffects(this.dep)
+    }
+  }
+}
 
-    this._value = newValue
-    // 触发依赖
-    triggerEffects(this.dep)
+function trackRefValue(ref) {
+  // 有可能 ref 的使用过程中，并没有 effect，那么就不需要进行依赖收集了
+  if(isTracking()){
+    // 收集依赖
+    trackEffects(ref.dep)
   }
 }
 
