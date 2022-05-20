@@ -1,4 +1,4 @@
-import { readonly } from "../reactive";
+import { isReadonly, readonly } from "../reactive";
 
 describe("readonly", () => {
   it("happy path", () => {
@@ -7,6 +7,10 @@ describe("readonly", () => {
     const wrapped = readonly(original);
     expect(wrapped).not.toBe(original);
     expect(wrapped.foo).toBe(1);
+
+    // 补充测试
+    expect(isReadonly(wrapped)).toBe(true);
+    expect(isReadonly(original)).toBe(false);
   });
 
   it("warn then call set", () => { // 被set时报警告，并且没有被赋值
