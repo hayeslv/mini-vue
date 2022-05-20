@@ -17,6 +17,9 @@ class RefImpl {
     return this._value
   }
   set value(newValue) {
+    // 如果是相同的值，就直接 return 掉
+    if(Object.is(newValue, this._value)) return
+
     this._value = newValue
     // 触发依赖
     triggerEffects(this.dep)

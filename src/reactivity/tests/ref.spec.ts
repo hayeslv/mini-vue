@@ -25,8 +25,8 @@ describe("ref", () => {
     expect(dummy).toBe(2);
   
     // 相同值不再触发依赖
-    // a.value = 2;
-    // expect(calls).toBe(2);
-    // expect(dummy).toBe(2);
+    a.value = 2;
+    expect(calls).toBe(2);
+    expect(dummy).toBe(2);
   });
 });
