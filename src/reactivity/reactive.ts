@@ -1,6 +1,8 @@
 import { mutableHandlers, readonlyHandlers } from "./baseHandlers";
 
-
+export const enum ReactiveFlags {
+  IS_REACTIVE = "__v_isReactive"
+}
 
 // reactive其实就是 Proxy 的代理
 export function reactive(raw) {
@@ -12,7 +14,7 @@ export function readonly(raw) {
 }
 
 export function isReactive(value){
-  return !!value["is_reactive"];
+  return !!value[ReactiveFlags.IS_REACTIVE];
 }
 
 function createActiveObject(raw, baseHandlers) {
