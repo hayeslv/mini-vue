@@ -11,6 +11,10 @@ describe("readonly", () => {
     // 补充测试
     expect(isReadonly(wrapped)).toBe(true);
     expect(isReadonly(original)).toBe(false);
+
+    // readonly嵌套
+    expect(isReadonly(wrapped.bar)).toBe(true);
+    expect(isReadonly(original.bar)).toBe(false);
   });
 
   it("warn then call set", () => { // 被set时报警告，并且没有被赋值
