@@ -1,11 +1,15 @@
-import { hasChanged } from "../shared"
+import { hasChanged, isObject } from "../shared"
 import { isTracking, trackEffects, triggerEffects } from "./effect"
+import { reactive } from "./reactive"
 
 class RefImpl {
   private _value: any
   public dep
+  private _rawValue: any
   constructor(value){
-    this._value = value
+    this._rawValue = value
+    this._value = isObject(value) ? reactive(value) : value
+
     this.dep = new Set()
   }
   get value() {
@@ -15,8 +19,9 @@ class RefImpl {
   }
   set value(newValue) {
     // 如果值改变了，再执行
-    if(hasChanged(newValue, this._value)) {
-      this._value = newValue
+    if(hasChanged(newValue, this._rawValue)) {
+      this._rawValue = newValue
+      this._value = isObject(newValue) ? reactive(newValue) : newValue
       // 触发依赖
       triggerEffects(this.dep)
     }
