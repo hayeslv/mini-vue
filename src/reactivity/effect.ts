@@ -43,7 +43,7 @@ function cleanupEffect(effect) {
   effect.deps.length = 0
 }
 
-function isTracking() {
+export function isTracking() {
   return shouldTrack && activeEffect !== undefined
 }
 
@@ -66,6 +66,10 @@ export function track(target, key) {
   }
 
   
+  trackEffects(dep)
+}
+
+export function trackEffects(dep){
   // effect收集依赖的过程是在run方法执行中
   // 所以是先执行run方法，这里可以保证 activeEffect 已经有值了
   if(dep.has(activeEffect)) return; // 避免重复收集
@@ -79,6 +83,10 @@ export function trigger(target, key) {
   let depsMap = targetMap.get(target)
   let dep = depsMap.get(key)
 
+  triggerEffects(dep)
+}
+
+export function triggerEffects(dep){
   for (const effect of dep) {
     // 触发依赖的时候，看看effect中是否有 scheduler，如果有的话就执行，没有的话才会执行run方法
     if (effect.scheduler) {
