@@ -43,7 +43,14 @@ function cleanupEffect(effect) {
   effect.deps.length = 0
 }
 
+function isTracking() {
+  return shouldTrack && activeEffect !== undefined
+}
+
 export function track(target, key) {
+  // activeEffect有可能是undefined，因为有可能是单纯的reactive，并没有使用 effect
+  if(!isTracking()) return
+
   // 依赖不能重复，我们选择 Set 这个数据结构
   // target -> key -> dep
   let depsMap = targetMap.get(target)
@@ -58,11 +65,10 @@ export function track(target, key) {
     depsMap.set(key, dep)
   }
 
-  // activeEffect有可能是undefined，因为有可能是单纯的reactive，并没有使用 effect
-  if (!activeEffect) return
-  if (!shouldTrack) return;
+  
   // effect收集依赖的过程是在run方法执行中
   // 所以是先执行run方法，这里可以保证 activeEffect 已经有值了
+  if(dep.has(activeEffect)) return; // 避免重复收集
   dep.add(activeEffect)
   // 反向收集：effect可以知道自己被存储在哪些 dep 中
   activeEffect.deps.push(dep)
