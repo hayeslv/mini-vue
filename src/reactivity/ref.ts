@@ -8,7 +8,7 @@ class RefImpl {
   private _rawValue: any
   constructor(value){
     this._rawValue = value
-    this._value = isObject(value) ? reactive(value) : value
+    this._value = convert(value)
 
     this.dep = new Set()
   }
@@ -21,11 +21,15 @@ class RefImpl {
     // 如果值改变了，再执行
     if(hasChanged(newValue, this._rawValue)) {
       this._rawValue = newValue
-      this._value = isObject(newValue) ? reactive(newValue) : newValue
+      this._value = convert(newValue)
       // 触发依赖
       triggerEffects(this.dep)
     }
   }
+}
+
+function convert(value) {
+  return isObject(value) ? reactive(value) : value
 }
 
 function trackRefValue(ref) {
