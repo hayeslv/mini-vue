@@ -21,6 +21,16 @@ function processComponent(vnode, container) {
 function mountComponent(vnode: any, container: any) {
   // 抽离出 instance 实例，表示组件实例
   const instance = createComponentInstance(vnode)
+  // 安装component
   setupComponent(instance)
+  // 安装render
+  setupRenderEffect(instance, container)
+}
+
+function setupRenderEffect(instance, container) {
+  // 获取render函数的返回值（返回的是组件的虚拟节点树）
+  const subTree = instance.render()
+  // 基于返回的虚拟节点，对其进行patch比对（打补丁）
+  patch(subTree, container)
 }
 
