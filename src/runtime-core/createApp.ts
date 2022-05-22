@@ -1,3 +1,4 @@
+import { render } from "./render"
 import { createVNode } from "./vnode"
 
 export function createApp(rootComponent){
@@ -10,11 +11,3 @@ export function createApp(rootComponent){
   }
 }
 
-function render(vnode, container) {
-  patch(vnode, container);
-}
-
-function patch(vnode, container) {
-  // TODO 处理组件
-  // TODO 处理元素
-}
