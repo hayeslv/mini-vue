@@ -1,8 +1,9 @@
+import { h } from '../../lib/guide-mini-vue.esm.js'
+
 export const App = {
   name: "App",
   render() {
-    // ui
-    return h("div", "hi, mini-vue", )
+    return h("div", "hi, mini-vue")
   },
   setup() {
     return {

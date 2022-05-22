@@ -10,6 +10,7 @@ function patch(vnode, container) {
 
 
   // TODO 处理元素
+  // processElement()
 }
 
 function processComponent(vnode, container) {
