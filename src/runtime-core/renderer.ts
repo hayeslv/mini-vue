@@ -68,8 +68,9 @@ function mountChildren(vnode, container) {
 }
 
 function setupRenderEffect(instance, container) {
+  const { proxy } = instance
   // 获取render函数的返回值（返回的是组件的虚拟节点树）
-  const subTree = instance.render()
+  const subTree = instance.render.call(proxy)
   // 基于返回的虚拟节点，对其进行patch比对（打补丁）
   patch(subTree, container)
 }

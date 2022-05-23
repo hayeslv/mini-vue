@@ -1,7 +1,8 @@
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
-    type: vnode.type
+    type: vnode.type,
+    setupState: {} // 给定 setupState 初始值
   }
 
   return component
@@ -20,6 +21,16 @@ export function setupComponent(instance){
 
 function setupStatefulComponent(instance: any) {
   const Component = instance.type
+
+  // 使用空对象，叫做 ctx
+  instance.proxy = new Proxy({}, {
+    get(target, key) { // target 就是ctx，key对应 this.msg 中的 msg
+      const { setupState } = instance // 组件setup()函数返回的对象
+      if(key in setupState) { // 如果当前访问的 key 在 setupState 上，则直接返回
+        return setupState[key]
+      }
+    }
+  })
 
   const { setup } = Component
   if(setup) {

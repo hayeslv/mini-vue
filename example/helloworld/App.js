@@ -8,15 +8,16 @@ export const App = {
       "div", 
       {
         id: "root",
-        // class: "red"
-      }, 
+        class: "red"
+      },
+      "hi," + this.msg // 组件代理对象
       // String类型
       // "hi, mini-vue"
       // Array类型
-      [
-        h("p", { class: "red" }, "hi"),
-        h("p", { class: "blue" }, "mini-vue"),
-      ]
+      // [
+      //   h("p", { class: "red" }, "hi"),
+      //   h("p", { class: "blue" }, "mini-vue"),
+      // ]
     )
     
   },
