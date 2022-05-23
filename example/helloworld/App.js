@@ -9,7 +9,10 @@ export const App = {
       "div", 
       {
         id: "root",
-        class: "red"
+        class: "red",
+        onClick() {
+          console.log("click!!");
+        }
       },
       "hi," + this.msg // 组件代理对象
       // String类型
