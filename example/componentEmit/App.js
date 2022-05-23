@@ -7,8 +7,10 @@ export const App = {
     return h("div", {}, [
       h("div", {}, "APP"),
       h(Foo, {
-        onAdd() { // 在Foo的第二个参数，使用 onAdd 接收 emit
+        onAdd(a, b) { // 在Foo的第二个参数，使用 onAdd 接收 emit
           console.log("on-addddd");
+          console.log('a:' + a);
+          console.log('b:' + b);
         }
       })
     ])

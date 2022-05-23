@@ -4,8 +4,8 @@ export const Foo = {
   setup(props, { emit }) {
     const emitAdd = () => {
       console.log("emit add");
-      emit("add") // 希望上层组件接收到 add
-      // emit("add", 1, 2)
+      // emit("add") // 希望上层组件接收到 add
+      emit("add", 1, 2)
       // emit("add-foo", 1, 2)
     }
     return { emitAdd }
