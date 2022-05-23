@@ -1,4 +1,5 @@
 import { shallowReadonly } from "../reactivity/reactive"
+import { emit } from "./componentEmit";
 import { initProps } from "./componentProps"
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance"
 
@@ -8,7 +9,11 @@ export function createComponentInstance(vnode) {
     type: vnode.type,
     setupState: {}, // 给定 setupState 初始值
     props: {}, // 声明 props 属性
+    emit: () => {},
   }
+
+  // 使用 bind 初始化 emit，用户使用的时候只需要传事件名，但是真实的 emit 实现中也可以拿到 instance 了
+  component.emit = emit.bind(null, component) as any;
 
   return component
 }
@@ -36,7 +41,9 @@ function setupStatefulComponent(instance: any) {
     // setup 可以返回 function 或 Object
     // function：组件的render函数
     // Object：会把Object对象注入到当前组件上下文中
-    const setupResult = setup(shallowReadonly(instance.props))
+    const setupResult = setup(shallowReadonly(instance.props), {
+      emit: instance.emit // 挂载emit
+    })
 
     // 处理setup的结果
     handleSetupResult(instance, setupResult)
