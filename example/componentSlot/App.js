@@ -6,7 +6,12 @@ export const App = {
   render() {
     const app = h("div", {}, "App")
     // const foo = h(Foo, {}, [h("p", {}, "22222"), h("p", {}, "33333")])
-    const foo = h(Foo, {}, h("p", {}, "33333"))
+    // const foo = h(Foo, {}, h("p", {}, "33333"))
+    // 将数组替换为对象
+    const foo = h(Foo, {}, {
+      header: h("p", {}, "headerrrrr"),
+      footer: h("p", {}, "footerrrrrr"),
+    })
 
     return h("div", {}, [app, foo])
   },
