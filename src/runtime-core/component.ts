@@ -29,6 +29,10 @@ function setupStatefulComponent(instance: any) {
       if(key in setupState) { // 如果当前访问的 key 在 setupState 上，则直接返回
         return setupState[key]
       }
+
+      if(key === "$el") {
+        return instance.vnode.el
+      }
     }
   })
 

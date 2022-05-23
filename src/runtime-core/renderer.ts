@@ -42,7 +42,7 @@ function mountComponent(vnode: any, container: any) {
 }
 
 function mountElement(vnode, container) {
-  const el = document.createElement(vnode.type)
+  const el = vnode.el = document.createElement(vnode.type)
   // children可能是：string、array
   const { props, children }  = vnode
 
@@ -68,9 +68,12 @@ function mountChildren(vnode, container) {
 }
 
 function setupRenderEffect(instance, container) {
-  const { proxy } = instance
-  // 获取render函数的返回值（返回的是组件的虚拟节点树）
+  const { proxy, vnode } = instance
+  // 获取render函数的返回值（返回的是组件render的虚拟节点树）
   const subTree = instance.render.call(proxy)
   // 基于返回的虚拟节点，对其进行patch比对（打补丁）
   patch(subTree, container)
+
+  // 此处可以确定所有的 element 都被 mount 了
+  vnode.el = subTree.el
 }

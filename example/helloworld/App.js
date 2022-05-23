@@ -3,6 +3,7 @@ import { h } from '../../lib/guide-mini-vue.esm.js'
 export const App = {
   name: "App",
   render() {
+    window.self = this; // 赋值this
     // 添加第二个参数：props
     return h(
       "div", 
