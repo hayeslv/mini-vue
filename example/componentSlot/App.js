@@ -9,8 +9,8 @@ export const App = {
     // const foo = h(Foo, {}, h("p", {}, "33333"))
     // 将数组替换为对象
     const foo = h(Foo, {}, {
-      header: h("p", {}, "headerrrrr"),
-      footer: h("p", {}, "footerrrrrr"),
+      header: ({age}) => h("p", {}, "headerrrrr" + age),
+      footer: () => h("p", {}, "footerrrrrr"),
     })
 
     return h("div", {}, [app, foo])
