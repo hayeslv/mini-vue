@@ -1,3 +1,5 @@
+import { PublicInstanceProxyHandlers } from "./componentPublicInstance"
+
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
@@ -23,18 +25,8 @@ function setupStatefulComponent(instance: any) {
   const Component = instance.type
 
   // 使用空对象，叫做 ctx
-  instance.proxy = new Proxy({}, {
-    get(target, key) { // target 就是ctx，key对应 this.msg 中的 msg
-      const { setupState } = instance // 组件setup()函数返回的对象
-      if(key in setupState) { // 如果当前访问的 key 在 setupState 上，则直接返回
-        return setupState[key]
-      }
-
-      if(key === "$el") {
-        return instance.vnode.el
-      }
-    }
-  })
+  // ====== 通过 ctx 传递 instance ======
+  instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers)
 
   const { setup } = Component
   if(setup) {
