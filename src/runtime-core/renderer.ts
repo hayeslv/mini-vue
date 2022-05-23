@@ -50,7 +50,8 @@ function mountElement(vnode, container) {
     el.textContent = children
   } else if(Array.isArray(children)) {
     // children 中每个都是 vnode，需要继续调用 patch，来判断是element类型还是component类型，并对其初始化
-    children.forEach(v => patch(v, el))
+    // 重构：children.forEach(v => patch(v, el))
+    mountChildren(vnode, el)
   }
 
   // props
@@ -60,6 +61,10 @@ function mountElement(vnode, container) {
   }
 
   container.append(el)
+}
+
+function mountChildren(vnode, container) {
+  vnode.children.forEach(v => patch(v, container))
 }
 
 function setupRenderEffect(instance, container) {
