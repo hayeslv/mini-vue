@@ -40,17 +40,20 @@ function setupStatefulComponent(instance: any) {
 
   const { setup } = Component
   if(setup) {
+    // currentInstance = instance
+    setCurrentInstance(instance)
     // setup 可以返回 function 或 Object
     // function：组件的render函数
     // Object：会把Object对象注入到当前组件上下文中
     const setupResult = setup(shallowReadonly(instance.props), {
       emit: instance.emit // 挂载emit
     })
+		// currentInstance = null // 清空
+    setCurrentInstance(null)
 
     // 处理setup的结果
     handleSetupResult(instance, setupResult)
   }
-
 }
 function handleSetupResult(instance: any, setupResult: any) {
   // 基于上述的两种情况（setup可能会返回function或object）来做实现
@@ -72,3 +75,13 @@ function finishComponentSetup(instance: any) {
   instance.render = Component.render
 }
 
+// 借助全局变量来获取组件实例
+let currentInstance = null
+export function getCurrentInstance(){
+  // 返回组件实例
+  return currentInstance
+}
+
+export function setCurrentInstance(instance){
+  currentInstance = instance
+}
