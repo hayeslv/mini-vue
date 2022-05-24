@@ -1,12 +1,12 @@
-import { createVNode } from "../vnode";
+import { createVNode, Fragment } from "../vnode";
 
 export function renderSlots(slots, name, props){
-  // return createVNode("div", {}, slots)
   const slot = slots[name];
   if(slot) {
-    // return createVNode("div", {}, slot)
     if(typeof slot === "function") {
-      return createVNode("div", {}, slot(props))
+      // 只需要把第三个参数（也就是这里的 children）渲染出来就行了
+      // 将 div 修改为 Fragment（特殊的type）
+      return createVNode(Fragment, {}, slot(props))
     }
   }
 }

@@ -1,19 +1,33 @@
 import { isObject, ShapeFlags } from './../shared';
 import { createComponentInstance, setupComponent } from "./component";
+import { Fragment } from './vnode';
 
 export function render(vnode, container) {
   patch(vnode, container);
 }
 
 function patch(vnode, container) {
-  const { shapeFlag } = vnode
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    // 处理元素
-    processElement(vnode, container)
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    // 处理组件
-    processComponent(vnode, container)
+  const { type, shapeFlag } = vnode
+
+  // Fragment -> 只渲染 children
+  switch(type) {
+    case Fragment:
+      processFragment(vnode, container)
+      break;
+    default: // 不是特殊的类型，继续走之前的逻辑
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        // 处理元素
+        processElement(vnode, container)
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        // 处理组件
+        processComponent(vnode, container)
+      }
+      break;
   }
+}
+
+function processFragment(vnode, container) {
+  mountChildren(vnode, container)
 }
 
 function processComponent(vnode, container) {
