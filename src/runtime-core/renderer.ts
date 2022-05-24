@@ -1,6 +1,6 @@
 import { isObject, ShapeFlags } from './../shared';
 import { createComponentInstance, setupComponent } from "./component";
-import { Fragment } from './vnode';
+import { Fragment, Text } from './vnode';
 
 export function render(vnode, container) {
   patch(vnode, container);
@@ -10,9 +10,12 @@ function patch(vnode, container) {
   const { type, shapeFlag } = vnode
 
   // Fragment -> 只渲染 children
-  switch(type) {
+  switch (type) {
     case Fragment:
       processFragment(vnode, container)
+      break;
+    case Text:
+      processText(vnode, container)
       break;
     default: // 不是特殊的类型，继续走之前的逻辑
       if (shapeFlag & ShapeFlags.ELEMENT) {
@@ -28,6 +31,12 @@ function patch(vnode, container) {
 
 function processFragment(vnode, container) {
   mountChildren(vnode, container)
+}
+
+function processText(vnode, container) {
+  const { children } = vnode
+  const textNode = vnode.el = document.createTextNode(children)
+  container.append(textNode)
 }
 
 function processComponent(vnode, container) {
@@ -57,11 +66,11 @@ function mountComponent(initialVNode: any, container: any) {
 function mountElement(vnode, container) {
   const el = vnode.el = document.createElement(vnode.type)
   // children可能是：string、array
-  const { props, children, shapeFlag }  = vnode
+  const { props, children, shapeFlag } = vnode
 
-  if(shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children
-  } else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     // children 中每个都是 vnode，需要继续调用 patch，来判断是element类型还是component类型，并对其初始化
     // 重构：children.forEach(v => patch(v, el))
     mountChildren(vnode, el)
@@ -72,8 +81,8 @@ function mountElement(vnode, container) {
     const value = props[key]
 
     // 判断是否是事件的命名规范
-    const isOn = (key: string) => /^on[A-Z]/.test(key); 
-    if(isOn(key)) {
+    const isOn = (key: string) => /^on[A-Z]/.test(key);
+    if (isOn(key)) {
       const event = key.slice(2).toLowerCase()
       el.addEventListener(event, value)
     } else {
