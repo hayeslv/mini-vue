@@ -9,8 +9,7 @@ const Provider = {
   render() {
     return h("div", {}, [
       h("p", {}, "Provider"),
-      // h(ProviderTwo)
-      h(Consumer)
+      h(ProviderTwo)
     ])
   }
 }

@@ -11,7 +11,7 @@ export function createComponentInstance(vnode, parent) {
     setupState: {}, // 给定 setupState 初始值
     props: {}, // 声明 props 属性
     slots: {},
-    provides: {},
+    provides: parent ? parent.provides : {},
     parent,
     emit: () => {},
   }
