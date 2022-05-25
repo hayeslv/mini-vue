@@ -1,3 +1,4 @@
+import { effect } from '../reactivity/effect';
 import { isObject, ShapeFlags } from './../shared';
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppApi } from './createApp';
@@ -5,9 +6,9 @@ import { Fragment, Text } from './vnode';
 
 export function createRenderer(options){
   const {
-    createElement,
-    patchProp,
-    insert
+    createElement: hostCreateElement,
+    patchProp: hostPatchProp,
+    insert: hostInsert
   } = options
 
   function render(vnode, container) {
@@ -72,9 +73,8 @@ export function createRenderer(options){
   }
   
   function mountElement(vnode, container, parentComponent) {
-    // const el = vnode.el = document.createElement(vnode.type)
     // 新建节点--替换为稳定的接口
-    const el = vnode.el = createElement(vnode.type)
+    const el = vnode.el = hostCreateElement(vnode.type)
     const { props, children, shapeFlag } = vnode
   
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
@@ -88,19 +88,11 @@ export function createRenderer(options){
     for (const key in props) {
       const value = props[key]
       // 添加属性--替换为稳定的接口
-      patchProp(el, key, value)
-      // const isOn = (key: string) => /^on[A-Z]/.test(key);
-      // if (isOn(key)) {
-      //   const event = key.slice(2).toLowerCase()
-      //   el.addEventListener(event, value)
-      // } else {
-      //   el.setAttribute(key, value)
-      // }
+      hostPatchProp(el, key, value)
     }
   
-    // container.append(el)
     // 添加到视图--替换为稳定的接口
-    insert(el, container)
+    hostInsert(el, container)
   }
   
   function mountChildren(vnode, container, parentComponent) {
@@ -108,14 +100,30 @@ export function createRenderer(options){
   }
   
   function setupRenderEffect(instance, container) {
-    const { proxy, vnode } = instance
-    // 获取render函数的返回值（返回的是组件render的虚拟节点树）
-    const subTree = instance.render.call(proxy)
-    // 基于返回的虚拟节点，对其进行patch比对（打补丁）
-    patch(subTree, container, instance)
-  
-    // 此处可以确定所有的 element 都被 mount 了
-    vnode.el = subTree.el
+    effect(() => {
+      if(!instance.isMounted) {
+        const { proxy, vnode } = instance
+        // 获取render函数的返回值（返回的是组件render的虚拟节点树）
+        const subTree = instance.subTree = instance.render.call(proxy)
+        // 基于返回的虚拟节点，对其进行patch比对（打补丁）
+        patch(subTree, container, instance)
+      
+        // 此处可以确定所有的 element 都被 mount 了
+        vnode.el = subTree.el
+
+        instance.isMounted = true
+      } else {
+        console.log("update");
+        const { proxy } = instance
+        const subTree = instance.render.call(proxy)
+        const prevSubTree = instance.subTree
+        instance.subTree = subTree
+
+        // 更新
+        // patch(subTree, container, instance)
+      }
+      
+    })
   }
 
   return {
