@@ -43,7 +43,7 @@ export function createRenderer(options){
   }
   
   function processFragment(n1, n2, container, parentComponent) {
-    mountChildren(n2, container, parentComponent)
+    mountChildren(n2.children, container, parentComponent)
   }
   
   function processText(n1, n2, container) {
@@ -62,11 +62,11 @@ export function createRenderer(options){
     if(!n1) {
       mountElement(n2, container, parentComponent)
     } else {
-      patchElement(n1, n2, container)
+      patchElement(n1, n2, container, parentComponent)
     }
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentComponent) {
     console.log('patchElement');
     // 更新对比
     const oldProps = n1.props || EMPTY_OBJ
@@ -74,12 +74,12 @@ export function createRenderer(options){
 
     const el = n2.el = n1.el // n1.el是初始化得到的，赋值给n2.el可以保证下次调用时（更新）可以拿到正确的 el
 
-    patchChildren(n1, n2, el)
+    patchChildren(n1, n2, el, parentComponent)
     patchProps(el, oldProps, newProps)
 
   }
 
-  function patchChildren(n1, n2, container) {
+  function patchChildren(n1, n2, container, parentComponent) {
     const prevShapeFlag = n1.shapeFlag
     const shapeFlag = n2.shapeFlag
     const c1 = n1.children
@@ -93,6 +93,11 @@ export function createRenderer(options){
       }
       if(c1 !== c2) {
         hostSetElementText(container, c2)
+      }
+    } else { // 新节点是 array
+      if(prevShapeFlag & ShapeFlags.TEXT_CHILDREN) { // 老节点是text
+        hostSetElementText(container, "") // 清空 text
+        mountChildren(c2, container, parentComponent) // 挂载children
       }
     }
   }
@@ -145,7 +150,7 @@ export function createRenderer(options){
       el.textContent = children
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       // children 中每个都是 vnode，需要继续调用 patch，来判断是element类型还是component类型，并对其初始化
-      mountChildren(vnode, el, parentComponent)
+      mountChildren(vnode.children, el, parentComponent)
     }
   
     // props
@@ -159,8 +164,8 @@ export function createRenderer(options){
     hostInsert(el, container)
   }
   
-  function mountChildren(vnode, container, parentComponent) {
-    vnode.children.forEach(v => patch(null, v, container, parentComponent))
+  function mountChildren(children, container, parentComponent) {
+    children.forEach(v => patch(null, v, container, parentComponent))
   }
   
   function setupRenderEffect(instance, container) {
