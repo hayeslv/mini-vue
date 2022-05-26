@@ -86,15 +86,13 @@ export function createRenderer(options){
     const c2 = n2.children
 
     if(shapeFlag & ShapeFlags.TEXT_CHILDREN) { // 新节点是 text
+      // 新节点是text，如果老节点是 arr 则需要清空，如果老节点是 text 则直接设置
       if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 老节点是 array
         // 1.把老的 children 清空
         unmountChildren(n1.children)
-        // 2.设置 text
+      }
+      if(c1 !== c2) {
         hostSetElementText(container, c2)
-      } else { // 老节点是 text
-        if(c1 !== c2) {
-          hostSetElementText(container, c2)
-        }
       }
     }
   }
