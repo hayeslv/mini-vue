@@ -59,7 +59,6 @@ export function createRenderer(options){
   }
   
   function processElement(n1, n2, container, parentComponent) {
-    console.log('processElement');
     if(!n1) {
       mountElement(n2, container, parentComponent)
     } else {
@@ -83,15 +82,19 @@ export function createRenderer(options){
   function patchChildren(n1, n2, container) {
     const prevShapeFlag = n1.shapeFlag
     const shapeFlag = n2.shapeFlag
+    const c1 = n1.children
     const c2 = n2.children
 
-    
     if(shapeFlag & ShapeFlags.TEXT_CHILDREN) { // 新节点是 text
       if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 老节点是 array
         // 1.把老的 children 清空
         unmountChildren(n1.children)
         // 2.设置 text
         hostSetElementText(container, c2)
+      } else { // 老节点是 text
+        if(c1 !== c2) {
+          hostSetElementText(container, c2)
+        }
       }
     }
   }
