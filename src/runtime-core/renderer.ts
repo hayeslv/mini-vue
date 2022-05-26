@@ -8,7 +8,9 @@ export function createRenderer(options){
   const {
     createElement: hostCreateElement,
     patchProp: hostPatchProp,
-    insert: hostInsert
+    insert: hostInsert,
+    remove: hostRemove,
+    setElementText: hostSetElementText
   } = options
 
   function render(vnode, container) {
@@ -57,14 +59,13 @@ export function createRenderer(options){
   }
   
   function processElement(n1, n2, container, parentComponent) {
+    console.log('processElement');
     if(!n1) {
       mountElement(n2, container, parentComponent)
     } else {
       patchElement(n1, n2, container)
     }
   }
-
-  
 
   function patchElement(n1, n2, container) {
     console.log('patchElement');
@@ -74,9 +75,32 @@ export function createRenderer(options){
 
     const el = n2.el = n1.el // n1.el是初始化得到的，赋值给n2.el可以保证下次调用时（更新）可以拿到正确的 el
 
+    patchChildren(n1, n2, el)
     patchProps(el, oldProps, newProps)
 
-    // childrens
+  }
+
+  function patchChildren(n1, n2, container) {
+    const prevShapeFlag = n1.shapeFlag
+    const shapeFlag = n2.shapeFlag
+    const c2 = n2.children
+
+    
+    if(shapeFlag & ShapeFlags.TEXT_CHILDREN) { // 新节点是 text
+      if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) { // 老节点是 array
+        // 1.把老的 children 清空
+        unmountChildren(n1.children)
+        // 2.设置 text
+        hostSetElementText(container, c2)
+      }
+    }
+  }
+
+  function unmountChildren(children) {
+    for(let i=0; i<children.length; i++) {
+      const el = children[i].el
+      hostRemove(el)
+    }
   }
 
   function patchProps(el, oldProps, newProps) {
